@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>London Titans FC Calendar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1vfgHIrVca--raiKcdltA3K_QcTURcDN0&sz=w1000" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Archivo', 'sans-serif'],
+            },
+            colors: {
+              theme: {
+                gold: '#FFD102',
+                'gold-dim': '#D4AE00',
+                base: '#26241E',
+                dark: '#1D1B17',
+                light: '#38352E',
+                text: '#F5F5F5',
+                muted: '#A19F9A',
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      html {
+        background-color: #161616;
+        height: 100%;
+        overflow-y: auto;
+      }
+      body {
+        font-family: 'Archivo', sans-serif;
+        background-color: #161616;
+        color: #F5F5F5;
+        min-height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .fade-in { 
+        animation: fadeIn 0.3s ease-out forwards; 
+        will-change: opacity;
+      }
+      @keyframes fadeIn { 
+        from { opacity: 0; transform: translateY(5px); } 
+        to { opacity: 1; transform: translateY(0); } 
+      }
+      
+      .zoom-in { 
+        animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+      }
+      @keyframes zoomIn { 
+        from { transform: scale(0.96); opacity: 0; } 
+        to { transform: scale(1); opacity: 1; } 
+      }
+
+      /* Optimized Social Glimmer for Mobile */
+      .social-glimmer {
+        position: relative;
+        overflow: hidden;
+        transform: translateZ(0); /* Force Hardware Acceleration */
+      }
+
+      .social-glimmer::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to right, 
+          transparent, 
+          rgba(255, 255, 255, 0.1), 
+          transparent
+        );
+        animation: shimmer-sweep 4s infinite ease-in-out;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      @keyframes shimmer-sweep {
+        0% { transform: translateX(0) skewX(-20deg); }
+        25%, 100% { transform: translateX(200%) skewX(-20deg); }
+      }
+
+      /* Subtle Sparkle Background */
+      .social-sparkle-bg {
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        animation: move-sparkle 20s linear infinite;
+      }
+
+      @keyframes move-sparkle {
+        from { background-position: 0 0; }
+        to { background-position: 40px 40px; }
+      }
+
+      @keyframes float-sparkle {
+        0%, 100% { transform: translateY(0) scale(1) translateZ(0); opacity: 0.3; }
+        50% { transform: translateY(-5px) scale(1.1) translateZ(0); opacity: 0.7; }
+      }
+      .animate-float-sparkle {
+        animation: float-sparkle 4s ease-in-out infinite;
+        will-change: transform, opacity;
+      }
+
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="p-2 sm:p-8 selection:bg-theme-gold selection:text-theme-base">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
