@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Fixture } from '../types';
-import { MapPin, CalendarDays, Trophy, Swords, PartyPopper, Sparkles } from 'lucide-react';
+import { MapPin, CalendarDays, Swords, PartyPopper, Sparkles } from 'lucide-react';
 
 interface FeaturedMatchProps {
   fixtures: Fixture[];
@@ -75,7 +75,7 @@ const FeaturedMatch: React.FC<FeaturedMatchProps> = ({ fixtures, onClick }) => {
              let subTextColor = "text-theme-muted";
 
              if (isSocial) {
-                 rowBgClass = "bg-gradient-to-r from-indigo-950/40 via-fuchsia-900/20 to-indigo-950/40 hover:bg-fuchsia-900/30 social-glimmer";
+                 rowBgClass = "social-glitter-static";
                  timeBgClass = "bg-fuchsia-600 text-white shadow-lg";
                  teamHighlightClass = "text-white";
              } else if (theme === 'gold') {
@@ -106,7 +106,8 @@ const FeaturedMatch: React.FC<FeaturedMatchProps> = ({ fixtures, onClick }) => {
                       onClick={() => onClick(fixture)}
                       className={`group/item relative p-8 sm:p-12 flex flex-col items-center justify-center gap-4 transition-all duration-300 text-center w-full ${rowBgClass}`}
                     >
-                        <div className="absolute top-4 right-4 text-fuchsia-500/30 animate-float-sparkle z-20 pointer-events-none">
+                        <div className="social-glimmer-overlay"></div>
+                        <div className="absolute top-4 right-4 text-fuchsia-400/20 z-20 pointer-events-none">
                             <Sparkles size={40} />
                         </div>
                         <span className="bg-fuchsia-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-lg flex items-center gap-1 mb-2 relative z-20">
