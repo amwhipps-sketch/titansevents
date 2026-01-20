@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from './Badge';
-import { Calendar as CalendarIcon, List, ChevronLeft, ChevronRight, Settings, ShieldCheck } from 'lucide-react';
+import { Calendar as CalendarIcon, List, ChevronLeft, ChevronRight, Settings, ShieldCheck, RefreshCw } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: 'fixtures' | 'results' | 'admin';
@@ -14,6 +14,7 @@ interface HeaderProps {
   isLoading: boolean;
   showFilters: boolean;
   onToggleFilters: () => void;
+  onSync: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -22,7 +23,9 @@ const Header: React.FC<HeaderProps> = ({
     viewMode,
     onViewModeChange,
     currentDate,
-    onMonthChange
+    onMonthChange,
+    isLoading,
+    onSync
 }) => {
   const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
@@ -43,16 +46,27 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
             </div>
 
-            <button 
-                onClick={() => onTabChange(activeTab === 'admin' ? 'fixtures' : 'admin')}
-                className={`p-3 rounded-xl border transition-all ${
-                    activeTab === 'admin' 
-                    ? 'bg-theme-gold border-theme-gold text-theme-base shadow-lg' 
-                    : 'bg-theme-light border-white/5 text-theme-muted hover:text-white'
-                }`}
-            >
-                <Settings size={20} />
-            </button>
+            <div className="flex items-center gap-2">
+                <button 
+                    onClick={onSync}
+                    disabled={isLoading}
+                    className={`p-3 rounded-xl border transition-all bg-theme-light border-white/5 text-theme-muted hover:text-theme-gold disabled:opacity-50`}
+                    title="Sync with Calendar"
+                >
+                    <RefreshCw size={20} className={isLoading ? 'animate-spin' : ''} />
+                </button>
+
+                <button 
+                    onClick={() => onTabChange(activeTab === 'admin' ? 'fixtures' : 'admin')}
+                    className={`p-3 rounded-xl border transition-all ${
+                        activeTab === 'admin' 
+                        ? 'bg-theme-gold border-theme-gold text-theme-base shadow-lg' 
+                        : 'bg-theme-light border-white/5 text-theme-muted hover:text-white'
+                    }`}
+                >
+                    <Settings size={20} />
+                </button>
+            </div>
         </div>
 
         {activeTab !== 'admin' && (
