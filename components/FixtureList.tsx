@@ -78,13 +78,13 @@ const FixtureList: React.FC<FixtureListProps> = ({ fixtures, onEventClick }) => 
                     </div>
 
                     <div className="flex-grow min-w-0">
-                        <div className="flex items-center gap-2 mb-1.5">
-                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1 ${badgeColor}`}>
+                        <div className="flex items-center flex-wrap gap-2 mb-1.5">
+                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1 shrink-0 ${badgeColor}`}>
                                 {icon} {isSocial ? 'SOCIAL' : isTraining ? 'TRAINING' : isTournament ? 'TOURNAMENT' : 'EVENT'}
                             </span>
-                            <span className="text-[9px] font-black uppercase text-white/40 tracking-wider truncate">{item.competition}</span>
+                            <span className="text-[9px] font-black uppercase text-white/40 tracking-wider break-words">{item.competition}</span>
                         </div>
-                        <h4 className="text-sm sm:text-base font-black uppercase text-white truncate leading-none">
+                        <h4 className="text-sm sm:text-base font-black uppercase text-white leading-tight break-words">
                             {item.teamName}
                         </h4>
                     </div>
