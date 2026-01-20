@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import Header from './components/Header';
 import FixtureList from './components/FixtureList';
@@ -22,7 +21,7 @@ const App: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<Fixture | null>(null);
 
-  // Default to false (Socials Only) as requested
+  // Default to false (Socials Only)
   const [showMatches, setShowMatches] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -80,38 +79,34 @@ const App: React.FC = () => {
   const { upcomingEvents, nextDayEvents } = useMemo(() => {
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
-      // Keep today's events active for 12 hours after start to ensure they show up in 'What's Next'
       const featuredCutoff = new Date(now.getTime() - (12 * 60 * 60 * 1000));
 
       const filtered = fixtures.filter(f => {
-          const competition = f.competition.toLowerCase();
-          const isMatch = f.competition === 'Fixture' || 
-                         competition.includes('league') || 
-                         competition.includes('cup') || 
-                         competition.includes('shield') || 
-                         competition.includes('final') || 
-                         competition.includes('tournament');
+          const compLower = f.competition.toLowerCase();
           
-          const isSocial = competition === 'social' || competition === 'club event';
-          const isTraining = competition.includes('training');
+          // Define what counts as a competitive match
+          const isMatch = compLower === 'fixture' || 
+                         compLower.includes('league') || 
+                         compLower.includes('cup') || 
+                         compLower.includes('shield') || 
+                         compLower.includes('final') || 
+                         compLower.includes('tournament');
+          
+          const isTraining = compLower.includes('training');
 
-          // Date logic
+          // If NOT in +Fixtures mode, we hide competitive matches but KEEP Socials/Training/Events
+          if (!showMatches && isMatch) return false;
+          
+          // Basic date filtering
           const isToday = f.date.toDateString() === now.toDateString();
           const isUpcoming = f.date >= todayStart && f.status !== 'completed';
           
-          if ((!isUpcoming && !isToday) || isTraining) return false;
-
-          // Filter matches based on toggle (Socials vs +Fixtures)
-          if (!showMatches && isMatch) return false;
-          
-          return isMatch || isSocial;
+          return isToday || isUpcoming;
       });
 
       filtered.sort((a, b) => a.date.getTime() - b.date.getTime());
 
       let featuredEvents: Fixture[] = [];
-      // Look for the next date that has visible events
       const potentialFeatured = filtered.filter(f => f.date >= featuredCutoff);
 
       if (potentialFeatured.length > 0) {
@@ -161,7 +156,6 @@ const App: React.FC = () => {
                   <AdminPanel adminData={adminData} fixtures={fixtures} onDataChange={setAdminData} onRefresh={fetchData} />
                 ) : (
                   <div className="space-y-6">
-                    {/* Filter Selector - Default is Socials */}
                     <div className="flex justify-center sm:justify-start">
                         <div className="inline-flex bg-theme-dark p-1 rounded-2xl border border-theme-light/30 shadow-inner">
                             <button 
@@ -215,4 +209,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
