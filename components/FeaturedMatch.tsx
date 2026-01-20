@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Fixture } from '../types';
 import { MapPin, CalendarDays, Swords, PartyPopper, Sparkles } from 'lucide-react';
@@ -14,7 +13,6 @@ const FeaturedMatch: React.FC<FeaturedMatchProps> = ({ fixtures, onClick }) => {
   const primaryDateObj = fixtures[0].date;
   const dateStr = primaryDateObj.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
-  // Helper to determine special styling theme
   const getCompetitionTheme = (fixture: Fixture) => {
       const text = (fixture.competition + ' ' + (fixture.competitionTag || '')).toUpperCase();
       if (text.includes('SEMI-FINAL') || text.includes('SF') || text.includes('PLATE')) return 'silver';
@@ -45,7 +43,7 @@ const FeaturedMatch: React.FC<FeaturedMatchProps> = ({ fixtures, onClick }) => {
         <h3 className="text-white font-black uppercase tracking-widest text-[10px] sm:text-sm">What's Next</h3>
       </div>
       
-      <div className="w-full relative overflow-hidden rounded-2xl bg-theme-dark border border-theme-gold/30 shadow-2xl shadow-black/50 transform translate-z-0">
+      <div className="w-full relative overflow-hidden rounded-2xl bg-theme-dark border border-theme-gold/30 shadow-2xl shadow-black/50">
         <div className="relative flex justify-center items-center bg-black/40 backdrop-blur-md p-3 border-b border-white/5 z-20">
             <div className="flex items-center gap-2 text-white/90">
                 <CalendarDays size={14} className="text-theme-gold" />
@@ -56,15 +54,16 @@ const FeaturedMatch: React.FC<FeaturedMatchProps> = ({ fixtures, onClick }) => {
         <div className="flex flex-col divide-y divide-white/5 relative z-10">
           {fixtures.map((fixture) => {
              const isHome = fixture.isHome;
+             const compLower = fixture.competition.toLowerCase();
              const isDerby = fixture.opponent.toLowerCase().includes('titan');
-             const isTournament = fixture.competition.toLowerCase().includes('tournament');
-             const isSocial = fixture.competition.toLowerCase().includes('social') || fixture.competition === 'Club Event';
+             const isTournament = compLower.includes('tournament');
+             const isSocial = compLower.includes('social') || compLower === 'club event' || compLower.includes('training');
+             
              const titansName = fixture.teamName;
              const opponentName = fixture.opponent;
              const time = fixture.date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
              const theme = getCompetitionTheme(fixture);
-             
              const sizeLevel = Math.min(getSizeLevel(titansName), getSizeLevel(opponentName || ''));
              const sharedSizeClass = sizeClasses[sizeLevel];
 
@@ -75,43 +74,28 @@ const FeaturedMatch: React.FC<FeaturedMatchProps> = ({ fixtures, onClick }) => {
              let subTextColor = "text-theme-muted";
 
              if (isSocial) {
-                 rowBgClass = "social-glitter-static";
+                 rowBgClass = "social-glitter-static hover:opacity-90 transition-opacity";
                  timeBgClass = "bg-fuchsia-600 text-white shadow-lg";
                  teamHighlightClass = "text-white";
              } else if (theme === 'gold') {
                  rowBgClass = "bg-yellow-500/10 hover:bg-yellow-500/20";
                  timeBgClass = "bg-yellow-500 text-yellow-950";
                  teamHighlightClass = "text-yellow-400";
-                 subTextColor = "text-yellow-200/50";
-             } else if (theme === 'silver') {
-                 rowBgClass = "bg-slate-400/10 hover:bg-slate-400/20";
-                 timeBgClass = "bg-slate-300 text-slate-900";
-                 teamHighlightClass = "text-slate-200";
-                 subTextColor = "text-slate-400/50";
-             } else if (theme === 'bronze') {
-                 rowBgClass = "bg-[#cd7f32]/10 hover:bg-[#cd7f32]/20";
-                 timeBgClass = "bg-[#cd7f32] text-white";
-                 teamHighlightClass = "text-[#ffc490]";
-                 subTextColor = "text-[#cd7f32]/60";
              }
-
-             const getTeamNameClass = (isHighlighted: boolean) => {
-               return `${sharedSizeClass} font-black uppercase leading-[1.1] tracking-tight px-2 ${isHighlighted ? teamHighlightClass : teamNormalClass}`;
-             };
 
              if (isSocial) {
                  return (
                     <button 
                       key={fixture.id}
                       onClick={() => onClick(fixture)}
-                      className={`group/item relative p-8 sm:p-12 flex flex-col items-center justify-center gap-4 transition-all duration-300 text-center w-full ${rowBgClass}`}
+                      className={`group relative p-8 sm:p-12 flex flex-col items-center justify-center gap-4 text-center w-full ${rowBgClass}`}
                     >
-                        <div className="social-glimmer-overlay"></div>
+                        <div className="social-glitter-sparkles"></div>
                         <div className="absolute top-4 right-4 text-fuchsia-400/20 z-20 pointer-events-none">
                             <Sparkles size={40} />
                         </div>
                         <span className="bg-fuchsia-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-lg flex items-center gap-1 mb-2 relative z-20">
-                            <PartyPopper size={10} /> SOCIAL EVENT
+                            <PartyPopper size={10} /> CLUB ACTIVITY
                         </span>
                         
                         <div className={`${sharedSizeClass} font-black uppercase leading-[0.9] tracking-tight px-2 text-white relative z-20 drop-shadow-lg`}>
@@ -138,10 +122,10 @@ const FeaturedMatch: React.FC<FeaturedMatchProps> = ({ fixtures, onClick }) => {
               <button 
                 key={fixture.id}
                 onClick={() => onClick(fixture)}
-                className={`group/item relative p-5 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 hover:opacity-100 transition-all duration-300 text-left w-full ${rowBgClass}`}
+                className={`group relative p-5 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 transition-all duration-300 text-left w-full ${rowBgClass}`}
               >
                 <div className="flex-1 min-w-0 flex flex-col items-center text-center gap-2 order-1 sm:order-none w-full relative z-20">
-                    <div className={getTeamNameClass(isHome)}>
+                    <div className={`${sharedSizeClass} font-black uppercase leading-[1.1] tracking-tight px-2 ${isHome ? teamHighlightClass : teamNormalClass}`}>
                         {isHome ? titansName : opponentName}
                     </div>
                 </div>
@@ -152,15 +136,8 @@ const FeaturedMatch: React.FC<FeaturedMatchProps> = ({ fixtures, onClick }) => {
                             <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider shadow-lg flex items-center gap-1">
                                 <Swords size={10} /> DERBY
                             </span>
-                        ) : isTournament ? (
-                            <span className="bg-indigo-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider shadow-lg flex items-center gap-1">
-                                <Swords size={10} /> TOURNAMENT
-                            </span>
                         ) : (
-                            <span className={`
-                                text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider shadow-lg
-                                ${isHome ? 'bg-theme-gold text-theme-base' : 'bg-gradient-to-r from-[#f5abb9] to-[#5bcffa] text-white'}
-                            `}>
+                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider shadow-lg ${isHome ? 'bg-theme-gold text-theme-base' : 'bg-gradient-to-r from-[#f5abb9] to-[#5bcffa] text-white'}`}>
                                 {isHome ? 'HOME' : 'AWAY'}
                             </span>
                         )}
@@ -170,15 +147,13 @@ const FeaturedMatch: React.FC<FeaturedMatchProps> = ({ fixtures, onClick }) => {
                         {time === '00:00' ? 'TBC' : time}
                     </div>
                     
-                    <div className="flex flex-col items-center gap-0.5 max-w-[140px]">
-                        <span className={`flex items-center gap-1.5 ${subTextColor} text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-center break-words`}>
-                           {fixture.competition}
-                        </span>
-                    </div>
+                    <span className={`${subTextColor} text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-center max-w-[140px]`}>
+                        {fixture.competition}
+                    </span>
                 </div>
 
                 <div className="flex-1 min-w-0 flex flex-col items-center text-center gap-2 order-3 sm:order-none w-full relative z-20">
-                    <div className={getTeamNameClass(!isHome)}>
+                    <div className={`${sharedSizeClass} font-black uppercase leading-[1.1] tracking-tight px-2 ${!isHome ? teamHighlightClass : teamNormalClass}`}>
                         {isHome ? opponentName : titansName}
                     </div>
                 </div>
