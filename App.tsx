@@ -22,7 +22,8 @@ const App: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<Fixture | null>(null);
 
-  const [showMatches, setShowMatches] = useState(true);
+  // Default to false (Socials Only) as requested
+  const [showMatches, setShowMatches] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const appRef = useRef<HTMLDivElement>(null);
@@ -78,11 +79,10 @@ const App: React.FC = () => {
 
   const { upcomingEvents, nextDayEvents } = useMemo(() => {
       const now = new Date();
-      // Use local date start for comparison
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       
-      // Cut-off for featured is 6 hours ago to keep matches visible while active
-      const featuredCutoff = new Date(now.getTime() - (6 * 60 * 60 * 1000));
+      // Keep today's events active for 12 hours after start to ensure they show up in 'What's Next'
+      const featuredCutoff = new Date(now.getTime() - (12 * 60 * 60 * 1000));
 
       const filtered = fixtures.filter(f => {
           const competition = f.competition.toLowerCase();
@@ -96,11 +96,13 @@ const App: React.FC = () => {
           const isSocial = competition === 'social' || competition === 'club event';
           const isTraining = competition.includes('training');
 
-          // Keep today's events visible regardless of completion status
+          // Date logic
           const isToday = f.date.toDateString() === now.toDateString();
           const isUpcoming = f.date >= todayStart && f.status !== 'completed';
           
           if ((!isUpcoming && !isToday) || isTraining) return false;
+
+          // Filter matches based on toggle (Socials vs +Fixtures)
           if (!showMatches && isMatch) return false;
           
           return isMatch || isSocial;
@@ -109,6 +111,7 @@ const App: React.FC = () => {
       filtered.sort((a, b) => a.date.getTime() - b.date.getTime());
 
       let featuredEvents: Fixture[] = [];
+      // Look for the next date that has visible events
       const potentialFeatured = filtered.filter(f => f.date >= featuredCutoff);
 
       if (potentialFeatured.length > 0) {
@@ -158,6 +161,7 @@ const App: React.FC = () => {
                   <AdminPanel adminData={adminData} fixtures={fixtures} onDataChange={setAdminData} onRefresh={fetchData} />
                 ) : (
                   <div className="space-y-6">
+                    {/* Filter Selector - Default is Socials */}
                     <div className="flex justify-center sm:justify-start">
                         <div className="inline-flex bg-theme-dark p-1 rounded-2xl border border-theme-light/30 shadow-inner">
                             <button 
@@ -165,7 +169,7 @@ const App: React.FC = () => {
                                 className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${!showMatches ? 'bg-fuchsia-600 text-white shadow-lg scale-105' : 'text-theme-muted hover:text-white'}`}
                             >
                                 <PartyPopper size={16} />
-                                <span>Socials Only</span>
+                                <span>Socials</span>
                                 {!showMatches && <Check size={14} className="ml-1" />}
                             </button>
                             <button 
@@ -211,3 +215,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
