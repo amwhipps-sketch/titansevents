@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>London Titans FC Calendar</title>
+    <title>London Titans FC - Socials & Activities</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -20,11 +20,11 @@
               theme: {
                 gold: '#FFD102',
                 'gold-dim': '#D4AE00',
-                base: '#26241E',
-                dark: '#1D1B17',
-                light: '#38352E',
+                base: '#161616',
+                dark: '#0A0A0A',
+                light: '#262626',
                 text: '#F5F5F5',
-                muted: '#A19F9A',
+                muted: '#888888',
               }
             }
           },
@@ -32,50 +32,35 @@
       }
     </script>
     <style>
-      html {
-        background-color: #161616;
-        height: 100%;
-        overflow-y: auto;
-      }
-      body {
-        font-family: 'Archivo', sans-serif;
-        background-color: #161616;
+      html, body {
+        background-color: #0A0A0A;
         color: #F5F5F5;
         min-height: 100%;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        -webkit-font-smoothing: antialiased;
       }
       
       .fade-in { 
         animation: fadeIn 0.4s ease-out forwards; 
-        will-change: opacity;
       }
       @keyframes fadeIn { 
-        from { opacity: 0; transform: translateY(5px); } 
+        from { opacity: 0; transform: translateY(8px); } 
         to { opacity: 1; transform: translateY(0); } 
       }
 
-      /* High-performance Static Glitter Style for iPhone */
-      .social-glitter-static {
-        position: relative;
+      /* High-performance Static Backgrounds */
+      .bg-starlight {
         background-color: #1e1b4b;
         background-image: 
-          linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%),
-          repeating-radial-gradient(circle at 0 0, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 20px);
-        background-attachment: local;
+          radial-gradient(1px 1px at 10% 10%, #fff, transparent),
+          radial-gradient(1px 1px at 20% 40%, #fff, transparent),
+          radial-gradient(1px 1px at 50% 20%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 80% 80%, #fff, transparent),
+          radial-gradient(1px 1px at 90% 30%, #fff, transparent),
+          linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
       }
 
-      .social-glitter-sparkles {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background-image: 
-          radial-gradient(1px 1px at 15% 15%, #fff 100%, transparent),
-          radial-gradient(1px 1px at 85% 20%, #fff 100%, transparent),
-          radial-gradient(1px 1px at 45% 45%, #fff 100%, transparent),
-          radial-gradient(1.5px 1.5px at 70% 75%, #fff 100%, transparent),
-          radial-gradient(1px 1px at 25% 85%, #fff 100%, transparent);
-        opacity: 0.4;
+      .bg-training {
+        background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
       }
 
       .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -94,7 +79,7 @@
 }
 </script>
 </head>
-  <body class="p-2 sm:p-8 selection:bg-theme-gold selection:text-theme-base">
+  <body class="p-2 sm:p-8">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
