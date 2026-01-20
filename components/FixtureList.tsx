@@ -31,7 +31,8 @@ const FixtureList: React.FC<FixtureListProps> = ({ fixtures, onEventClick }) => 
 
   return (
     <div className="space-y-12">
-      {Object.entries(grouped).map(([month, items]) => (
+      {/* Fix: Explicitly cast Object.entries result to [string, Fixture[]][] to ensure 'items' is not inferred as 'unknown' */}
+      {(Object.entries(grouped) as [string, Fixture[]][]).map(([month, items]) => (
         <div key={month}>
           <div className="flex items-center gap-4 mb-6">
             <div className="h-px bg-white/5 flex-grow"></div>
