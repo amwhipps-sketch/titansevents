@@ -191,7 +191,7 @@ const FixtureList: React.FC<FixtureListProps> = ({ fixtures, onEventClick, showR
                        rowBgClass = 'bg-indigo-600/15 hover:bg-indigo-600/25 border-indigo-400/30';
                    } else if (isSocial && !isCompleted) {
                        barBgClass = 'bg-fuchsia-600';
-                       rowBgClass = 'bg-fuchsia-950/10 hover:bg-fuchsia-950/20 border-fuchsia-400/20';
+                       rowBgClass = 'social-glitter-static hover:opacity-90 border-fuchsia-400/20';
                        teamNameColor = () => 'text-white';
                    }
 
@@ -203,8 +203,9 @@ const FixtureList: React.FC<FixtureListProps> = ({ fixtures, onEventClick, showR
                      <button 
                         key={fixture.id}
                         onClick={() => onEventClick(fixture)}
-                        className={`relative w-full text-left rounded-xl overflow-hidden transition-all duration-200 transform hover:-translate-y-0.5 pl-4 pr-3 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 ${rowBgClass} border border-theme-light/30 hover:border-theme-gold/30 shadow-md hover:shadow-xl ${isSocial && !isCompleted ? 'social-glimmer' : ''}`}
+                        className={`relative w-full text-left rounded-xl overflow-hidden transition-all duration-200 transform hover:-translate-y-0.5 pl-4 pr-3 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 ${rowBgClass} border border-theme-light/30 hover:border-theme-gold/30 shadow-md hover:shadow-xl`}
                      >
+                         {isSocial && <div className="social-glimmer-overlay"></div>}
                          <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${barBgClass} z-20`}></div>
                          <div className="flex flex-col items-center justify-center min-w-[40px] sm:min-w-[50px] border-r border-theme-light/10 pr-3 sm:pr-4 flex-shrink-0 relative z-20">
                              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-theme-muted">{dayDate.split(' ')[0]}</span>
@@ -248,3 +249,4 @@ const FixtureList: React.FC<FixtureListProps> = ({ fixtures, onEventClick, showR
 };
 
 export default FixtureList;
+
