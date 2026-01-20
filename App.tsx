@@ -109,14 +109,15 @@ const App: React.FC = () => {
           isLoading={isLoading}
           showFilters={showFilters}
           onToggleFilters={() => setShowFilters(!showFilters)}
+          onSync={fetchData}
         />
 
-        {isLoading ? (
+        {isLoading && fixtures.length === 0 ? (
             <div className="w-full h-64 flex flex-col items-center justify-center border border-white/5 rounded-2xl bg-white/5">
                 <div className="w-6 h-6 border-2 border-theme-gold border-t-transparent rounded-full animate-spin mb-4"></div>
                 <p className="text-theme-muted text-[10px] font-bold uppercase tracking-widest">Loading Club Schedule...</p>
             </div>
-        ) : error ? (
+        ) : error && fixtures.length === 0 ? (
             <div className="text-center p-12 bg-red-500/5 border border-red-500/20 rounded-2xl">
                 <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-4" />
                 <p className="text-white font-bold mb-4">{error}</p>
