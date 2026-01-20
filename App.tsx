@@ -7,7 +7,7 @@ import CalendarGrid from './components/CalendarGrid';
 import AdminPanel from './components/AdminPanel';
 import { getFixtures, getAdminData } from './services/fixtureService';
 import { Fixture, AdminStorage } from './types';
-import { RefreshCw, AlertCircle, Swords, PartyPopper, Check } from 'lucide-react';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 
 const App: React.FC = () => {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
@@ -20,34 +20,26 @@ const App: React.FC = () => {
   const [showWeekdays, setShowWeekdays] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<Fixture | null>(null);
-
-  // Default to false (Socials Only)
-  const [showMatches, setShowMatches] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const appRef = useRef<HTMLDivElement>(null);
 
+  // Auto-resize for parent iframe
   useEffect(() => {
     if (!appRef.current) return;
-
     const sendHeight = () => {
       if (appRef.current) {
-        const height = appRef.current.getBoundingClientRect().height;
         window.parent.postMessage({ 
           type: 'titans-calendar-resize', 
-          height: height 
+          height: appRef.current.getBoundingClientRect().height 
         }, '*');
       }
     };
-
     sendHeight();
-    const resizeObserver = new ResizeObserver(() => {
-      sendHeight();
-    });
-
-    resizeObserver.observe(appRef.current);
-    return () => resizeObserver.disconnect();
-  }, [isAdminMode, viewMode, showFilters, showWeekdays, fixtures, isLoading]);
+    const ro = new ResizeObserver(sendHeight);
+    ro.observe(appRef.current);
+    return () => ro.disconnect();
+  }, [isAdminMode, viewMode, fixtures, isLoading]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -55,9 +47,8 @@ const App: React.FC = () => {
     try {
       const data = await getFixtures();
       setFixtures(data);
-    } catch (error) {
-      console.error("Failed to fetch fixtures", error);
-      setError("Unable to connect to the match schedule service.");
+    } catch (e) {
+      setError("Unable to sync club activities.");
     } finally {
       setIsLoading(false);
     }
@@ -69,53 +60,44 @@ const App: React.FC = () => {
 
   const handleMonthChange = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => {
-      const newDate = new Date(prev);
-      if (direction === 'next') newDate.setMonth(prev.getMonth() + 1);
-      else newDate.setMonth(prev.getMonth() - 1);
-      return newDate;
+      const d = new Date(prev);
+      d.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
+      return d;
     });
   };
 
-  const { upcomingEvents, nextDayEvents } = useMemo(() => {
+  const { upcomingEvents, featuredEvents } = useMemo(() => {
       const now = new Date();
+      // Start of today for general list
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const featuredCutoff = new Date(now.getTime() - (12 * 60 * 60 * 1000));
+      // For the 'What's Next' section, keep events visible for 12 hours after they start
+      const featureLimit = new Date(now.getTime() - (12 * 60 * 60 * 1000));
 
       const filtered = fixtures.filter(f => {
-          const compLower = f.competition.toLowerCase();
+          const comp = f.competition.toLowerCase();
           
-          // Define what counts as a competitive match
-          const isMatch = compLower === 'fixture' || 
-                         compLower.includes('league') || 
-                         compLower.includes('cup') || 
-                         compLower.includes('shield') || 
-                         compLower.includes('final') || 
-                         compLower.includes('tournament');
-          
-          const isTraining = compLower.includes('training');
+          // STRICT EXCLUSION: Only keep socials, training, events, tournaments
+          const isMatch = comp === 'fixture' || comp.includes('league') || comp.includes('cup') || comp.includes('shield');
+          if (isMatch) return false;
 
-          // If NOT in +Fixtures mode, we hide competitive matches but KEEP Socials/Training/Events
-          if (!showMatches && isMatch) return false;
-          
-          // Basic date filtering
+          // DATE LOGIC: Keep anything from today onwards
           const isToday = f.date.toDateString() === now.toDateString();
-          const isUpcoming = f.date >= todayStart && f.status !== 'completed';
+          const isUpcoming = f.date >= todayStart;
           
           return isToday || isUpcoming;
       });
 
       filtered.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-      let featuredEvents: Fixture[] = [];
-      const potentialFeatured = filtered.filter(f => f.date >= featuredCutoff);
-
-      if (potentialFeatured.length > 0) {
-          const nextDateStr = potentialFeatured[0].date.toDateString();
-          featuredEvents = potentialFeatured.filter(f => f.date.toDateString() === nextDateStr);
+      let featured: Fixture[] = [];
+      const potential = filtered.filter(f => f.date >= featureLimit);
+      if (potential.length > 0) {
+          const nextDate = potential[0].date.toDateString();
+          featured = potential.filter(f => f.date.toDateString() === nextDate);
       }
 
-      return { upcomingEvents: filtered, nextDayEvents: featuredEvents };
-  }, [fixtures, showMatches]);
+      return { upcomingEvents: filtered, featuredEvents: featured };
+  }, [fixtures]);
 
   return (
     <div ref={appRef} className="max-w-3xl mx-auto px-4 sm:px-6 pb-12" id="app">
@@ -133,50 +115,23 @@ const App: React.FC = () => {
           onToggleFilters={() => setShowFilters(!showFilters)}
         />
 
-        {isLoading && (
-            <div className="w-full h-96 flex items-center justify-center border border-theme-light rounded-2xl bg-theme-light/10">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 border-4 border-theme-gold border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-theme-muted text-sm font-bold uppercase tracking-wider">Syncing Schedule...</p>
-                </div>
+        {isLoading ? (
+            <div className="w-full h-64 flex flex-col items-center justify-center border border-white/5 rounded-2xl bg-white/5">
+                <div className="w-6 h-6 border-2 border-theme-gold border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-theme-muted text-[10px] font-bold uppercase tracking-widest">Loading Club Schedule...</p>
             </div>
-        )}
-
-        {!isLoading && error && (
-             <div className="w-full flex flex-col items-center justify-center border border-theme-light rounded-2xl bg-theme-light/10 text-center p-8">
-                <div className="bg-red-500/10 text-red-500 p-4 rounded-full mb-4"><AlertCircle className="w-8 h-8" /></div>
-                <h3 className="text-theme-text font-bold text-xl mb-2">Connection Issue</h3>
-                <button onClick={fetchData} className="flex items-center gap-2 px-6 py-3 bg-theme-gold text-theme-base rounded-lg hover:bg-theme-gold-dim transition-all font-bold uppercase tracking-wider shadow-lg"><RefreshCw className="w-4 h-4" /> Retry</button>
+        ) : error ? (
+            <div className="text-center p-12 bg-red-500/5 border border-red-500/20 rounded-2xl">
+                <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-4" />
+                <p className="text-white font-bold mb-4">{error}</p>
+                <button onClick={fetchData} className="px-6 py-2 bg-theme-gold text-theme-base rounded-lg font-bold uppercase text-xs"><RefreshCw className="inline w-3 h-3 mr-2" /> Retry</button>
             </div>
-        )}
-
-        {!isLoading && !error && (
+        ) : (
             <div className="fade-in">
                 {isAdminMode ? (
                   <AdminPanel adminData={adminData} fixtures={fixtures} onDataChange={setAdminData} onRefresh={fetchData} />
                 ) : (
-                  <div className="space-y-6">
-                    <div className="flex justify-center sm:justify-start">
-                        <div className="inline-flex bg-theme-dark p-1 rounded-2xl border border-theme-light/30 shadow-inner">
-                            <button 
-                                onClick={() => setShowMatches(false)}
-                                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${!showMatches ? 'bg-fuchsia-600 text-white shadow-lg scale-105' : 'text-theme-muted hover:text-white'}`}
-                            >
-                                <PartyPopper size={16} />
-                                <span>Socials</span>
-                                {!showMatches && <Check size={14} className="ml-1" />}
-                            </button>
-                            <button 
-                                onClick={() => setShowMatches(true)}
-                                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${showMatches ? 'bg-theme-gold text-theme-base shadow-lg scale-105' : 'text-theme-muted hover:text-white'}`}
-                            >
-                                <Swords size={16} />
-                                <span>+ Fixtures</span>
-                                {showMatches && <Check size={14} className="ml-1" />}
-                            </button>
-                        </div>
-                    </div>
-
+                  <div className="space-y-8">
                     {viewMode === 'calendar' ? (
                         <CalendarGrid 
                             currentDate={currentDate} 
@@ -187,8 +142,8 @@ const App: React.FC = () => {
                         />
                     ) : (
                         <>
-                            {nextDayEvents.length > 0 && (
-                                <FeaturedMatch fixtures={nextDayEvents} onClick={setSelectedEvent} />
+                            {featuredEvents.length > 0 && (
+                                <FeaturedMatch fixtures={featuredEvents} onClick={setSelectedEvent} />
                             )}
                             <FixtureList 
                                 fixtures={upcomingEvents} 
