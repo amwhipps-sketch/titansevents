@@ -1,4 +1,3 @@
-
 import { Fixture, AdminStorage } from '../types';
 import { CALENDAR_ID } from '../constants';
 
@@ -42,8 +41,11 @@ const PROXIES: ProxyConfig[] = [
   { urlGenerator: (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, responseType: 'text' }
 ];
 
-const getIcsUrl = (calendarId: string) => 
-  `https://calendar.google.com/calendar/ical/${encodeURIComponent(calendarId)}/public/basic.ics`;
+const getIcsUrl = (calendarId: string) => {
+  // Append a unique timestamp to bust proxy and browser caches
+  const baseUrl = `https://calendar.google.com/calendar/ical/${encodeURIComponent(calendarId)}/public/basic.ics`;
+  return `${baseUrl}?t=${Date.now()}`;
+};
 
 const parseIcsDate = (dateStr: string): Date | null => {
   if (!dateStr) return null;
@@ -167,6 +169,34 @@ export const mapEventToFixture = (event: { UID: string, SUMMARY: string, LOCATIO
   };
 };
 
+export const getFixtures = async (): Promise<Fixture[]> => {
+  const adminData = getAdminData();
+  let googleFixtures: Fixture[] = [];
+  
+  try {
+    const icsUrl = getIcsUrl(CALENDAR_ID);
+    for (const proxy of PROXIES) {
+      try {
+        const response = await fetch(proxy.urlGenerator(icsUrl), {
+          cache: 'no-store' // Ensure browser doesn't cache the result
+        });
+        if (!response.ok) continue;
+        let data = proxy.responseType === 'json' ? (await response.json()).contents : await response.text();
+        if (data) { googleFixtures = parseICS(data); break; }
+      } catch (e) { console.warn(e); }
+    }
+  } catch (err) { console.error("Sync failed", err); }
+
+  const merged = googleFixtures.map(f => {
+    const override = adminData.manualOverrides[f.id];
+    if (override) return { ...f, ...override, isOverridden: true };
+    return f;
+  });
+
+  const finalFixtures = [...merged, ...adminData.manualAdditions];
+  return finalFixtures.sort((a, b) => a.date.getTime() - b.date.getTime());
+};
+
 const parseICS = (icsData: string): Fixture[] => {
   if (!icsData.includes("BEGIN:VCALENDAR")) throw new Error("Invalid ICS data");
   const lines = unfoldLines(icsData.split(/\r\n|\n|\r/));
@@ -190,30 +220,4 @@ const parseICS = (icsData: string): Fixture[] => {
     }
   }
   return fixtures;
-};
-
-export const getFixtures = async (): Promise<Fixture[]> => {
-  const adminData = getAdminData();
-  let googleFixtures: Fixture[] = [];
-  
-  try {
-    const icsUrl = getIcsUrl(CALENDAR_ID);
-    for (const proxy of PROXIES) {
-      try {
-        const response = await fetch(proxy.urlGenerator(icsUrl));
-        if (!response.ok) continue;
-        let data = proxy.responseType === 'json' ? (await response.json()).contents : await response.text();
-        if (data) { googleFixtures = parseICS(data); break; }
-      } catch (e) { console.warn(e); }
-    }
-  } catch (err) { console.error("Sync failed", err); }
-
-  const merged = googleFixtures.map(f => {
-    const override = adminData.manualOverrides[f.id];
-    if (override) return { ...f, ...override, isOverridden: true };
-    return f;
-  });
-
-  const finalFixtures = [...merged, ...adminData.manualAdditions];
-  return finalFixtures.sort((a, b) => a.date.getTime() - b.date.getTime());
 };
