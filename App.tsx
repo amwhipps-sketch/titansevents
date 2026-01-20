@@ -68,19 +68,15 @@ const App: React.FC = () => {
 
   const { upcomingEvents, featuredEvents } = useMemo(() => {
       const now = new Date();
-      // Start of today for general list
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      // For the 'What's Next' section, keep events visible for 12 hours after they start
       const featureLimit = new Date(now.getTime() - (12 * 60 * 60 * 1000));
 
       const filtered = fixtures.filter(f => {
           const comp = f.competition.toLowerCase();
           
-          // STRICT EXCLUSION: Only keep socials, training, events, tournaments
           const isMatch = comp === 'fixture' || comp.includes('league') || comp.includes('cup') || comp.includes('shield');
           if (isMatch) return false;
 
-          // DATE LOGIC: Keep anything from today onwards
           const isToday = f.date.toDateString() === now.toDateString();
           const isUpcoming = f.date >= todayStart;
           
@@ -100,7 +96,7 @@ const App: React.FC = () => {
   }, [fixtures]);
 
   return (
-    <div ref={appRef} className="max-w-3xl mx-auto px-4 sm:px-6 pb-12" id="app">
+    <div ref={appRef} className="w-full max-w-3xl mx-auto px-4 sm:px-8 py-4 sm:py-8 overflow-x-hidden" id="app">
         <Header 
           activeTab={isAdminMode ? 'admin' : 'fixtures'}
           onTabChange={(tab) => setIsAdminMode(tab === 'admin')}
@@ -127,11 +123,11 @@ const App: React.FC = () => {
                 <button onClick={fetchData} className="px-6 py-2 bg-theme-gold text-theme-base rounded-lg font-bold uppercase text-xs"><RefreshCw className="inline w-3 h-3 mr-2" /> Retry</button>
             </div>
         ) : (
-            <div className="fade-in">
+            <div className="fade-in w-full">
                 {isAdminMode ? (
                   <AdminPanel adminData={adminData} fixtures={fixtures} onDataChange={setAdminData} onRefresh={fetchData} />
                 ) : (
-                  <div className="space-y-8">
+                  <div className="space-y-8 w-full">
                     {viewMode === 'calendar' ? (
                         <CalendarGrid 
                             currentDate={currentDate} 
@@ -141,7 +137,7 @@ const App: React.FC = () => {
                             onShowWeekdaysChange={setShowWeekdays}
                         />
                     ) : (
-                        <>
+                        <div className="w-full">
                             {featuredEvents.length > 0 && (
                                 <FeaturedMatch fixtures={featuredEvents} onClick={setSelectedEvent} />
                             )}
@@ -151,7 +147,7 @@ const App: React.FC = () => {
                                 showResultsMode={false} 
                                 showFilters={showFilters}
                             />
-                        </>
+                        </div>
                     )}
                   </div>
                 )}
